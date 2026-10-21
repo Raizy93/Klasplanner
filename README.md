@@ -46,6 +46,10 @@ npm run dev
 
 Open daarna http://localhost:5173.
 
+Op Windows kan het ook met een dubbelklik op `start-klassenplanner.bat`: dat installeert zo nodig de onderdelen,
+start de app en opent de browser. Werkt `npm` niet in PowerShell ("running scripts is disabled"), gebruik dan dit
+bestand of typ `npm.cmd run dev`.
+
 Tests uitvoeren:
 
 ```bash

@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Windows-scripts altijd met CRLF-regeleinden
+*.bat text eol=crlf
