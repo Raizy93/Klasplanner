@@ -109,21 +109,43 @@ export function ClassroomCanvas() {
     return s;
   }, [plan, seatOfStudent]);
 
-  // ---- transformer (draaien / schalen) ----
+  // ---- vangnet: tekening altijd gelijk aan de opgeslagen gegevens ----
+  // react-konva past alleen gewijzigde props toe. Is een node ooit visueel verschoven zonder dat de
+  // gegevens veranderden (bijv. een afgebroken sleepactie), dan herstelt dit effect de juiste positie.
   useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage || dragRef.current) return;
+    for (const it of [...room.desks, ...room.objects]) {
+      const node = stage.findOne(`#${it.id}`);
+      if (!node) continue;
+      if (node.x() !== it.x || node.y() !== it.y || node.rotation() !== it.rotation || node.scaleX() !== 1 || node.scaleY() !== 1) {
+        node.setAttrs({ x: it.x, y: it.y, rotation: it.rotation, scaleX: 1, scaleY: 1 });
+      }
+    }
+    stage.batchDraw();
+  }, [room]);
+
+  // ---- transformer (draaien / schalen) ----
+  const attachTransformer = useCallback(() => {
     const tr = trRef.current;
     const stage = stageRef.current;
     if (!tr || !stage) return;
+    const sel = useAppStore.getState().selection;
     if (mode !== 'room') {
       tr.nodes([]);
       return;
     }
-    const nodes = selection.map((id) => stage.findOne(`#${id}`)).filter((n): n is Konva.Node => !!n);
+    const nodes = sel.map((id) => stage.findOne(`#${id}`)).filter((n): n is Konva.Node => !!n);
     tr.nodes(nodes);
-    const singleObject = selection.length === 1 && room.objects.some((o) => o.id === selection[0]);
+    const singleObject = sel.length === 1 && room.objects.some((o) => o.id === sel[0]);
     tr.resizeEnabled(singleObject);
+    tr.visible(true);
     tr.getLayer()?.batchDraw();
-  }, [selection, mode, room]);
+  }, [mode, room]);
+
+  useEffect(() => {
+    attachTransformer();
+  }, [selection, attachTransformer]);
 
   const onTransformEnd = useCallback(() => {
     const tr = trRef.current;
@@ -202,6 +224,11 @@ export function ClassroomCanvas() {
 
   const onItemDragStart = useCallback(
     (_e: Konva.KonvaEventObject<DragEvent>, item: { id: ID }) => {
+      // Er loopt al een sleepactie (andere geselecteerde items bewegen mee): niets doen.
+      if (dragRef.current) return;
+      // Koppel de transformer los: die zou anders zelf de andere geselecteerde nodes meeslepen,
+      // waardoor er twee sleepmechanismen tegelijk actief zijn.
+      trRef.current?.nodes([]);
       let ids = useAppStore.getState().selection;
       if (!ids.includes(item.id)) {
         ids = [item.id];
@@ -213,7 +240,6 @@ export function ClassroomCanvas() {
         if (p) start.set(id, p);
       });
       dragRef.current = { primary: item.id, start, delta: { x: 0, y: 0 } };
-      trRef.current?.visible(false);
     },
     [positionOf, setSelection],
   );
@@ -281,16 +307,22 @@ export function ClassroomCanvas() {
   );
 
   const onItemDragEnd = useCallback(
-    (_e: Konva.KonvaEventObject<DragEvent>, item: { id: ID }) => {
+    (e: Konva.KonvaEventObject<DragEvent>, item: { id: ID }) => {
       const ds = dragRef.current;
-      dragRef.current = null;
-      trRef.current?.visible(true);
+      // Alleen het item dat daadwerkelijk werd vastgepakt rondt de sleepactie af.
       if (!ds || ds.primary !== item.id) return;
-      const { x, y } = ds.delta;
-      if (Math.abs(x) < 0.01 && Math.abs(y) < 0.01) return;
-      update((d) => moveItems(d.room, [...ds.start.keys()], Math.round(x * 10) / 10, Math.round(y * 10) / 10));
+      dragRef.current = null;
+      const dx = Math.round(ds.delta.x * 10) / 10;
+      const dy = Math.round(ds.delta.y * 10) / 10;
+      // Zet alle nodes exact op hun eindpositie (ook bij een verschuiving van 0).
+      const stage = e.target.getStage();
+      ds.start.forEach((p, id) => stage?.findOne(`#${id}`)?.position({ x: p.x + dx, y: p.y + dy }));
+      if (Math.abs(dx) >= 0.01 || Math.abs(dy) >= 0.01) {
+        update((d) => moveItems(d.room, [...ds.start.keys()], dx, dy));
+      }
+      attachTransformer();
     },
-    [update],
+    [update, attachTransformer],
   );
 
   // ---- leerlingen verplaatsen in plaatsingsmodus ----

@@ -91,6 +91,15 @@ insluitbaar via iframe op MeesterDanny.com. Geen backend, geen accounts, geen ex
 Daarnaast handmatig in de browser gecontroleerd: renderen demoklas, genereren, conflictmelding, groep slepen/selecteren,
 naam slepen (wisselen), koppelen via UI, PNG-render zonder namen, PDF-opbouw.
 
+## Wijzigingslog
+
+- **21-10-2026 – Bugfix slepen met meerdere tafels.** Konva's `Transformer` sleepte geselecteerde nodes zelf mee
+  (`_proxyDrag`) naast onze eigen sleeplogica. Het `dragend` van een meegesleepte node wiste de sleepstatus vóór de
+  vastgepakte node kon opslaan → tekening en gegevens liepen uiteen (groepje "door elkaar"). Oplossing in
+  `ClassroomCanvas.tsx`: transformer losgekoppeld tijdens slepen, alleen de vastgepakte node rondt af, en een
+  vangnet-effect zet na iedere lokaalwijziging alle nodes exact op de opgeslagen positie.
+- **21-10-2026** – `start-klassenplanner.bat` + snelkoppeling; project gekoppeld aan github.com/Raizy93/Klasplanner.
+
 ## Bekende beperkingen / aandachtspunten
 
 - Relaties bestaan alleen binnen een gekoppelde groep; er is (nog) geen handmatige correctie van individuele relaties.
