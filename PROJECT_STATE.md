@@ -104,6 +104,13 @@ insluitbaar via iframe op MeesterDanny.com. Geen backend, geen accounts, geen ex
 Daarnaast handmatig in de browser gecontroleerd: renderen demoklas, genereren, conflictmelding, groep slepen/selecteren,
 naam slepen (wisselen), koppelen via UI, PNG-render zonder namen, PDF-opbouw.
 
+## Publicatie
+
+- Live: **https://klassenplanner.meesterdanny.com** (GitHub Pages via Actions-workflow, repo `Raizy93/Klasplanner`).
+- DNS bij Openprovider: CNAME `klassenplanner` → `raizy93.github.io` (overschrijft de wildcard naar JouwWeb).
+  Custom domain + "Enforce HTTPS" ingesteld in Settings → Pages; geen `CNAME`-bestand nodig bij Actions-deploys.
+- Lokaal starten: `start-klassenplanner.bat` (of `npm run dev`; in PowerShell eventueel `npm.cmd run dev`).
+
 ## Wijzigingslog
 
 - **21-10-2026 – Bugfix slepen met meerdere tafels.** Konva's `Transformer` sleepte geselecteerde nodes zelf mee
