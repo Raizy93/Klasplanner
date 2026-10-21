@@ -2,6 +2,7 @@ import { DEFAULT_ROOM_HEIGHT, DEFAULT_ROOM_WIDTH, DEFAULT_SETTINGS } from '../..
 import type { Plan, Room } from '../../models/types';
 import { createId } from '../../utils/id';
 import { addObject } from '../room/roomOps';
+import { emptySociogram } from '../sociogram/sociogramOps';
 
 export function createEmptyRoom(): Room {
   const room: Room = {
@@ -31,6 +32,7 @@ export function createEmptyPlan(name: string): Plan {
     arrangement: { assignments: {}, locked: [] },
     savedArrangements: [],
     settings: { ...DEFAULT_SETTINGS },
+    sociogram: emptySociogram(),
   };
 }
 

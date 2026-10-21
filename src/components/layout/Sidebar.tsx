@@ -1,16 +1,18 @@
-import { CircleCheck, CircleX, LoaderCircle, Scale, School, Sparkles, Users } from 'lucide-react';
+import { CircleCheck, CircleX, HeartHandshake, LoaderCircle, Scale, School, Sparkles, Users } from 'lucide-react';
 import { useRef, type KeyboardEvent } from 'react';
 import { useAppStore, type TabId } from '../../store/appStore';
 import { StudentsTab } from '../students/StudentsTab';
 import { RoomTab } from '../room/RoomTab';
 import { RulesTab } from '../rules/RulesTab';
 import { GenerateTab } from '../generator/GenerateTab';
+import { SociogramTab } from '../sociogram/SociogramTab';
 import { Notice } from '../ui/primitives';
 
 const TABS: { id: TabId; label: string; icon: typeof Users }[] = [
   { id: 'students', label: 'Leerlingen', icon: Users },
   { id: 'room', label: 'Lokaal', icon: School },
   { id: 'rules', label: 'Regels', icon: Scale },
+  { id: 'sociogram', label: 'Sociogram', icon: HeartHandshake },
   { id: 'generate', label: 'Indelen', icon: Sparkles },
 ];
 
@@ -68,7 +70,7 @@ export function Sidebar() {
         </div>
         <SaveIndicator />
       </div>
-      <div role="tablist" aria-label="Onderdelen" className="mx-3 mt-2 grid grid-cols-4 gap-1 rounded-xl border border-slate-200 bg-white p-1">
+      <div role="tablist" aria-label="Onderdelen" className="mx-3 mt-2 grid grid-cols-5 gap-1 rounded-xl border border-slate-200 bg-white p-1">
         {TABS.map((t, i) => {
           const Icon = t.icon;
           const active = activeTab === t.id;
@@ -86,7 +88,7 @@ export function Sidebar() {
               tabIndex={active ? 0 : -1}
               onClick={() => setTab(t.id)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`flex flex-col items-center gap-0.5 rounded-lg border-b-2 px-1 py-1.5 text-[13px] font-medium transition-colors ${
+              className={`flex min-w-0 flex-col items-center gap-0.5 rounded-lg border-b-2 px-0.5 py-1.5 text-[12px] font-medium transition-colors ${
                 active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-900'
               }`}
             >
@@ -110,6 +112,7 @@ export function Sidebar() {
         {activeTab === 'students' && <StudentsTab />}
         {activeTab === 'room' && <RoomTab />}
         {activeTab === 'rules' && <RulesTab />}
+        {activeTab === 'sociogram' && <SociogramTab />}
         {activeTab === 'generate' && <GenerateTab />}
       </div>
     </aside>

@@ -16,6 +16,10 @@ Werknaam · bedoeld voor [MeesterDanny.com](https://meesterdanny.com).
 - **Regels** – 13 regeltypes (vooraan/achteraan/links/rechts/midden, naast, niet naast, zelfde groepje, niet zelfde
   groepje, tegenover, niet tegenover, op/niet op zitplaats), als harde restrictie of als voorkeur (laag/normaal/sterk),
   tijdelijk uit te schakelen. Tegenstrijdige regels worden direct gesignaleerd.
+- **Sociogram** – per leerling invoeren met wie hij/zij graag of liever niet samenwerkt en speelt (of snel via een
+  matrix). Overzicht van wie opvalt (populair, afgewezen, genegeerd, controversieel), wederzijdse en tegengestelde
+  keuzes en hechte groepjes. Kies per vraag een doel (bestaande relaties bekrachtigen of nieuwe laten ontstaan) en
+  neem de voorgestelde regels over. Standaard afgeschermd, en nooit zichtbaar in de PNG/PDF-export.
 - **Indelen** – een echte constraint solver (backtracking + forward checking + matching-controle + local search),
   draait in een Web Worker met tijdslimiet. Resultaatkaart met controleerbare scores, "Nieuwe indeling",
   "Vorige indeling" en "Huidige indeling bewaren".

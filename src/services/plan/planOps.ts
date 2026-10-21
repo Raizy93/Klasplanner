@@ -3,6 +3,7 @@ import type { Arrangement, ID, Plan, Rule, Student } from '../../models/types';
 import { createId } from '../../utils/id';
 import { needsSecondStudent } from '../rules/ruleMeta';
 import { removeDesks } from '../room/roomOps';
+import { removeStudentFromSociogram } from '../sociogram/sociogramOps';
 
 /**
  * Bewerkingen op een plattegrond (leerlingen, regels, indeling).
@@ -68,12 +69,13 @@ export function rulesForStudent(plan: Plan, id: ID): Rule[] {
   return plan.rules.filter((r) => r.studentA === id || (needsSecondStudent(r.type) && r.studentB === id));
 }
 
-/** Verwijdert een leerling, inclusief zijn regels, zitplaats en vergrendeling. */
+/** Verwijdert een leerling, inclusief zijn regels, zitplaats, vergrendeling en sociogramkeuzes. */
 export function removeStudent(plan: Plan, id: ID): void {
   plan.students = plan.students.filter((s) => s.id !== id);
   const ruleIds = new Set(rulesForStudent(plan, id).map((r) => r.id));
   plan.rules = plan.rules.filter((r) => !ruleIds.has(r.id));
   unassignStudent(plan.arrangement, id);
+  removeStudentFromSociogram(plan.sociogram, id);
 }
 
 // ---------- Indeling ----------

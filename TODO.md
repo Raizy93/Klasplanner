@@ -15,11 +15,16 @@
 - [x] Autosave, meerdere plattegronden, JSON-import/-export
 - [x] PNG- en PDF-export (A4/A3), met/zonder namen
 - [x] Demoklas
-- [x] 63 geautomatiseerde tests, productiebuild, GitHub Pages-workflow
+- [x] 79 geautomatiseerde tests, productiebuild, GitHub Pages-workflow
 - [x] README, PROJECT_STATE
+- [x] Sociogram: invoer, matrix, overzicht (status, paren, hechte groepjes), regelvoorstellen met doel per vraag
 
 ## Openstaand
 
+- [ ] Sociogram: getekende weergave (namen met pijlen), filter per vraag
+- [ ] Sociogram: overzicht afdrukken/exporteren (bewust zonder automatische export i.v.m. privacy)
+- [ ] Sociogram: meerdere afnames bewaren en vergelijken (ontwikkeling door het jaar)
+- [ ] Sociogram: optionele regel "ieder kind bij minstens één positief gekozen klasgenoot" (vraagt nieuw regeltype in de solver)
 - [ ] Testen op tablets (iPad/Android) en in een iframe op MeesterDanny.com
 - [ ] Handmatig relaties binnen een groep corrigeren (naast/tegenover/geen)
 - [ ] Tafelafmeting per tafel instelbaar; tafels met twee zitplaatsen

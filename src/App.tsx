@@ -3,6 +3,7 @@ import { ClassroomCanvas } from './components/canvas/ClassroomCanvas';
 import { ExportHost } from './components/canvas/ExportHost';
 import { Sidebar } from './components/layout/Sidebar';
 import { Toolbar } from './components/layout/Toolbar';
+import { SociogramWorkspace, SocioViewBar } from './components/sociogram/SociogramWorkspace';
 import { Toasts } from './components/ui/Toasts';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useAppStore } from './store/appStore';
@@ -11,6 +12,8 @@ export default function App() {
   const sidebarOpen = useAppStore((s) => s.sidebarOpen);
   const setSidebarOpen = useAppStore((s) => s.setSidebarOpen);
   const requestFit = useAppStore((s) => s.requestFit);
+  const activeTab = useAppStore((s) => s.activeTab);
+  const socioView = useAppStore((s) => s.socioView);
   useKeyboardShortcuts();
 
   // Na het in- of uitklappen van het paneel de plattegrond opnieuw passend maken.
@@ -32,8 +35,9 @@ export default function App() {
       )}
       <main className="flex min-w-0 flex-1 flex-col">
         <Toolbar />
+        {activeTab === 'sociogram' && <SocioViewBar />}
         <div className="min-h-0 flex-1">
-          <ClassroomCanvas />
+          {activeTab === 'sociogram' && socioView !== 'plan' ? <SociogramWorkspace /> : <ClassroomCanvas />}
         </div>
       </main>
       <Toasts />

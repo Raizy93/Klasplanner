@@ -119,6 +119,34 @@ export interface Rule {
   strength: Strength;
   enabled: boolean;
   createdAt: number;
+  /** Herkomst: handmatig (leeg) of voorgesteld vanuit het sociogram. */
+  source?: 'sociogram';
+  /** Korte toelichting, bijv. "Sociogram werken: wederzijds negatief". */
+  note?: string;
+}
+
+// ---------- Sociogram ----------
+
+/** Samenwerken (werk) of samen spelen (sociaal). */
+export type SocioDimension = 'work' | 'play';
+
+/** Antwoorden van één leerling op het sociogramformulier. */
+export interface SocioResponse {
+  workPos: ID[];
+  workNeg: ID[];
+  playPos: ID[];
+  playNeg: ID[];
+}
+
+/** Doel bij het maken van groepjes: niets, bestaande relaties bekrachtigen of nieuwe laten ontstaan. */
+export type SocioGoal = 'none' | 'reinforce' | 'build';
+
+export interface Sociogram {
+  /** Sleutel = leerling die het formulier heeft ingevuld. Ontbreekt de sleutel, dan is er (nog) niets ingevoerd. */
+  responses: Record<ID, SocioResponse>;
+  /** Afnamedatum (JJJJ-MM-DD). */
+  date?: string;
+  goals: Record<SocioDimension, SocioGoal>;
 }
 
 /** Huidige indeling: zitplaats-ID → leerling-ID. Vastgezette leerlingen in `locked`. */
@@ -154,6 +182,7 @@ export interface Plan {
   arrangement: Arrangement;
   savedArrangements: SavedArrangement[];
   settings: GeneratorSettings;
+  sociogram: Sociogram;
 }
 
 export const SCHEMA_VERSION = 1;

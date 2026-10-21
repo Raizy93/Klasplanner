@@ -2,7 +2,7 @@ import { produce, type Draft } from 'immer';
 import { create } from 'zustand';
 import { createDemoPlan } from '../data/demo';
 import { OPTIMIZE_TIME_MS, SOLVER_TIME_LIMIT_MS } from '../models/constants';
-import type { Arrangement, ID, Plan, Rule } from '../models/types';
+import type { Arrangement, ID, Plan, Rule, SocioDimension } from '../models/types';
 import { buildProblem, toAssignments, type SkippedRule } from '../services/generator/buildProblem';
 import { runSolver } from '../services/generator/solverClient';
 import { createEmptyPlan, duplicatePlan } from '../services/plan/planFactory';
@@ -15,7 +15,8 @@ import { randomSeed } from '../utils/random';
 import { getSeatGraph } from './selectors';
 import { sanitizeArrangement } from '../validation/planValidation';
 
-export type TabId = 'students' | 'room' | 'rules' | 'generate';
+export type TabId = 'students' | 'room' | 'rules' | 'sociogram' | 'generate';
+export type SocioView = 'overview' | 'matrix' | 'plan';
 
 export interface Toast {
   id: string;
@@ -83,6 +84,11 @@ export interface AppState {
   showSeatNumbers: boolean;
   sidebarOpen: boolean;
   ruleDraft: RuleDraft | null;
+  /** Privacy: het sociogram is pas zichtbaar na bewust tonen en wordt verborgen bij verlaten van het tabblad. */
+  socioRevealed: boolean;
+  socioView: SocioView;
+  socioDimension: SocioDimension;
+  socioStudentId: ID | null;
   highlightRuleIds: ID[];
 
   generating: boolean;
@@ -102,6 +108,7 @@ export interface AppState {
   undo: () => void;
   redo: () => void;
   setTab: (tab: TabId) => void;
+  setSocio: (patch: Partial<Pick<AppState, 'socioRevealed' | 'socioView' | 'socioDimension' | 'socioStudentId'>>) => void;
   setSelection: (ids: ID[]) => void;
   selectStudent: (id: ID | null) => void;
   selectSeat: (id: ID | null) => void;
@@ -153,6 +160,8 @@ function resetPlanUi() {
     lastReport: null,
     ruleDraft: null,
     highlightRuleIds: [] as ID[],
+    socioRevealed: false,
+    socioStudentId: null,
   };
 }
 
@@ -167,6 +176,8 @@ export const useAppStore = create<AppState>()((set, get) => ({
   ...initialState(),
   ...resetPlanUi(),
   activeTab: 'students',
+  socioView: 'overview',
+  socioDimension: 'work',
   view: { scale: 0.8, x: 20, y: 20 },
   fitNonce: 0,
   showGrid: true,
@@ -243,7 +254,13 @@ export const useAppStore = create<AppState>()((set, get) => ({
     });
   },
 
-  setTab: (tab) => set({ activeTab: tab, selection: tab === 'room' ? get().selection : [] }),
+  setTab: (tab) =>
+    set({
+      activeTab: tab,
+      selection: tab === 'room' ? get().selection : [],
+      socioRevealed: tab === 'sociogram' ? get().socioRevealed : false,
+    }),
+  setSocio: (patch) => set(patch),
   setSelection: (ids) => set({ selection: ids }),
   selectStudent: (id) => set({ selectedStudentId: id, selectedSeatId: null }),
   selectSeat: (id) => set({ selectedSeatId: id }),
@@ -251,7 +268,7 @@ export const useAppStore = create<AppState>()((set, get) => ({
   requestFit: () => set({ fitNonce: get().fitNonce + 1 }),
   toggle: (key) => set({ [key]: !get()[key] } as Partial<AppState>),
   setSidebarOpen: (open) => set({ sidebarOpen: open }),
-  openRuleDraft: (draft) => set({ ruleDraft: { ...draft, nonce: Date.now() }, activeTab: 'rules' }),
+  openRuleDraft: (draft) => set({ ruleDraft: { ...draft, nonce: Date.now() }, activeTab: 'rules', socioRevealed: false }),
   clearRuleDraft: () => set({ ruleDraft: null }),
   setHighlightRules: (ids) => set({ highlightRuleIds: ids }),
 

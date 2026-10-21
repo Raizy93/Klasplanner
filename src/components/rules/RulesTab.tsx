@@ -9,7 +9,7 @@ import { precheck } from '../../solver/precheck';
 import { activePlan, useAppStore, type RuleDraft } from '../../store/appStore';
 import { getRuleEvaluations, getSeatGraph } from '../../store/selectors';
 import { Button, IconButton } from '../ui/Button';
-import { Card, Field, Notice, Select, Switch, TextInput } from '../ui/primitives';
+import { Badge, Card, Field, Notice, Select, Switch, TextInput } from '../ui/primitives';
 import { ConflictList } from './ConflictList';
 import { PriorityBadge, StatusText } from './RuleChip';
 
@@ -296,6 +296,11 @@ export function RulesTab() {
                       <div className={`text-sm ${r.enabled ? 'text-slate-800' : 'text-slate-400 line-through'}`}>{text}</div>
                       <div className="mt-1 flex flex-wrap items-center gap-2">
                         <PriorityBadge rule={r} />
+                        {r.source === 'sociogram' && (
+                          <Badge tone="blue" title={r.note}>
+                            Sociogram
+                          </Badge>
+                        )}
                         {e && <StatusText status={e.status} reason={e.reason} />}
                       </div>
                       {invalid && <p className="mt-1 text-xs text-red-700">Ongeldig: {invalid} Deze regel wordt overgeslagen.</p>}

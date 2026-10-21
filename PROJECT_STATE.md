@@ -30,7 +30,10 @@ insluitbaar via iframe op MeesterDanny.com. Geen backend, geen accounts, geen ex
 | JSON-export (huidige of alle) en -import (gevalideerd, schemaversie, nieuwe ID, nooit overschrijven) | ✅ |
 | PNG-export (≈3200 px breed) en PDF (A4/A3 liggend), met/zonder namen, optionele titel | ✅ |
 | Ongedaan maken/opnieuw (100 stappen, samenvoegen van snelle invoer), sneltoetsen | ✅ |
-| Demoklas (24 leerlingen, 6 groepjes van 4, digibord, deur, leerkrachttafel, 8 oplosbare voorbeeldregels) | ✅ |
+| Demoklas (24 leerlingen, 6 groepjes van 4, digibord, deur, leerkrachttafel, 8 oplosbare voorbeeldregels, fictief sociogram) | ✅ |
+| Sociogram: invoer per leerling (klik-chips) en matrixinvoer, afnamedatum, privacy-afscherming | ✅ |
+| Sociogram-overzicht: sociometrische positie, door niemand gekozen, paren (wederzijds +/−, tegengesteld, eenzijdig +), hechte groepjes, sorteerbare tabel | ✅ |
+| Sociogram → regels: doel per vraag (bekrachtigen / nieuwe relaties), voorstellen aanvinken en toevoegen, snelmenu per paar, label "Sociogram" | ✅ |
 
 ## Architectuur en belangrijke keuzes
 
@@ -71,10 +74,17 @@ insluitbaar via iframe op MeesterDanny.com. Geen backend, geen accounts, geen ex
   wordt bij laden gevalideerd; beschadigde data wordt apart bewaard. Autosave met 600 ms debounce + bij afsluiten.
 - **Export**: een verborgen Konva-stage (`components/canvas/ExportHost.tsx`) tekent alleen de plattegrond; jsPDF wordt
   pas bij PDF-export geladen.
+- **Sociogram** (`services/sociogram`, `components/sociogram`): `Plan.sociogram.responses[respondent]` met vier lijsten
+  (workPos/workNeg/playPos/playNeg); ontbrekende sleutel = niet ingevuld. Positief en negatief sluiten elkaar per vraag uit.
+  Analyse volgens Coie & Dodge (z-scores van ontvangen keuzes gedeeld door aantal kiezers; status pas vanaf 5
+  ingevulde formulieren). "Hechte groepjes" = maximale cliques (≥ 3) in de graaf van wederzijds positieve keuzes.
+  Het sociogram beïnvloedt de generator **nooit automatisch**: de leerkracht kiest voorstellen, die als gewone regels
+  (`source: 'sociogram'`, met `note`) worden toegevoegd. Afscherming (`socioRevealed`) wordt gereset bij het verlaten
+  van het tabblad. Sociogramgegevens komen nooit in PNG/PDF; wel in de JSON-back-up.
 - **Canvas** (`components/canvas`): modus "Lokaal bewerken" (tabblad Lokaal) vs. "Leerlingen plaatsen" (overige
   tabbladen) voorkomt onbedoeld verschuiven van tafels tijdens het indelen.
 
-## Tests (`npm test`, 63 tests)
+## Tests (`npm test`, 79 tests)
 
 - `tests/room.test.ts` – tafels toevoegen/verwijderen, groepjes (sjablonen), koppelen/losmaken, fysiek ≠ administratief,
   tafel uit groep verwijderen, groep verplaatsen/draaien behoudt relaties, dupliceren, naast/tegenover (ook gedraaid,
@@ -85,6 +95,9 @@ insluitbaar via iframe op MeesterDanny.com. Geen backend, geen accounts, geen ex
   solver), tijdslimiet ≠ onmogelijk, voorkeuren, alternatieve indeling verschilt, handmatige overtreding.
 - `tests/storage.test.ts` – leerlingen toevoegen/verwijderen, dubbele namen, namenlijst parsen, opslaan/herladen,
   beschadigde opslag, JSON export/import, ongeldige bestanden, reparatie van verwijzingen, wisselen.
+- `tests/sociogram.test.ts` – invoer (uitsluiting +/−, klikcyclus, ingevuld zonder keuzes), verwijderde leerling,
+  validatie/oude bestanden, telling, paren, status (populair/afgewezen/controversieel), hechte groepjes, te weinig
+  respondenten, classificatiedrempels, voorstellen (bekrachtigen, nieuwe relaties, botsing met bestaande regel).
 - `tests/store.test.ts` – undo/redo, samenvoegen, afwezigheid behoudt indeling, dubbele toewijzing voorkomen,
   plattegrondbeheer, genereren via de store, conflictmelding laat indeling ongemoeid, verwijderde tafel.
 
@@ -98,6 +111,7 @@ naam slepen (wisselen), koppelen via UI, PNG-render zonder namen, PDF-opbouw.
   vastgepakte node kon opslaan → tekening en gegevens liepen uiteen (groepje "door elkaar"). Oplossing in
   `ClassroomCanvas.tsx`: transformer losgekoppeld tijdens slepen, alleen de vastgepakte node rondt af, en een
   vangnet-effect zet na iedere lokaalwijziging alle nodes exact op de opgeslagen positie.
+- **21-10-2026 – Sociogram** toegevoegd (nieuw tabblad, overzicht, matrix, regelvoorstellen).
 - **21-10-2026** – `start-klassenplanner.bat` + snelkoppeling; project gekoppeld aan github.com/Raizy93/Klasplanner.
 
 ## Bekende beperkingen / aandachtspunten

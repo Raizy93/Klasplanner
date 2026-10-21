@@ -94,6 +94,21 @@ describe('JSON-import en -export', () => {
     }
   });
 
+  it('neemt het volledige sociogram en sociogramregels mee in export en import', () => {
+    const plan = createDemoPlan(false);
+    plan.sociogram.goals = { work: 'reinforce', play: 'build' };
+    rule(plan, 'notSameGroup', 'Noah', 'Finn', 'soft');
+    plan.rules[plan.rules.length - 1].source = 'sociogram';
+    plan.rules[plan.rules.length - 1].note = 'Sociogram samenwerken: wederzijds negatief';
+    const r = parseImport(serializePlans([plan]));
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(Object.keys(r.plans[0].sociogram.responses)).toHaveLength(22);
+      expect(r.plans[0].sociogram).toEqual(plan.sociogram);
+      expect(r.plans[0].rules).toEqual(plan.rules);
+    }
+  });
+
   it('weigert ongeldige of vreemde bestanden', () => {
     expect(parseImport('geen json').ok).toBe(false);
     expect(parseImport('{"foo":1}').ok).toBe(false);

@@ -11,10 +11,13 @@ import type {
   Rule,
   RuleType,
   SavedArrangement,
+  SocioGoal,
+  Sociogram,
   Seat,
   Student,
 } from '../models/types';
 import { RULE_META } from '../services/rules/ruleMeta';
+import { emptySociogram, sanitizeSociogram } from '../services/sociogram/sociogramOps';
 
 /**
  * Strikte validatie van plattegronden uit localStorage of een importbestand.
@@ -166,7 +169,33 @@ function parseRule(v: unknown): Rule {
     strength,
     enabled: bool(v.enabled, true),
     createdAt: num(v.createdAt, 'createdAt', Date.now()),
+    ...(v.source === 'sociogram' ? { source: 'sociogram' as const } : {}),
+    ...(typeof v.note === 'string' ? { note: v.note.slice(0, 120) } : {}),
   };
+}
+
+const GOALS: SocioGoal[] = ['none', 'reinforce', 'build'];
+const idList = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : []);
+
+function parseSociogram(v: unknown, studentIds: Set<string>): Sociogram {
+  if (!isObj(v)) return emptySociogram();
+  const responses: Sociogram['responses'] = {};
+  if (isObj(v.responses)) {
+    for (const [id, r] of Object.entries(v.responses)) {
+      if (!isObj(r)) continue;
+      responses[id] = { workPos: idList(r.workPos), workNeg: idList(r.workNeg), playPos: idList(r.playPos), playNeg: idList(r.playNeg) };
+    }
+  }
+  const goals = isObj(v.goals) ? v.goals : {};
+  const goal = (g: unknown): SocioGoal => (GOALS.includes(g as SocioGoal) ? (g as SocioGoal) : 'none');
+  return sanitizeSociogram(
+    {
+      responses,
+      ...(typeof v.date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v.date) ? { date: v.date } : {}),
+      goals: { work: goal(goals.work), play: goal(goals.play) },
+    },
+    studentIds,
+  );
 }
 
 function parseArrangement(v: unknown): Arrangement {
@@ -231,6 +260,7 @@ export function validatePlan(raw: unknown): ValidationResult<Plan> {
         extraVariation: bool(st.extraVariation, DEFAULT_SETTINGS.extraVariation),
         keepLocked: bool(st.keepLocked, DEFAULT_SETTINGS.keepLocked),
       },
+      sociogram: parseSociogram(raw.sociogram, new Set(students.map((x) => x.id))),
     };
     return { ok: true, value: plan, warnings };
   } catch (e) {
